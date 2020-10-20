@@ -1,18 +1,18 @@
 const express = require("express"),
     app = express(),
     bodyParser = require("body-parser"),
-    mongoose = require("mongoose");
+    mongoose = require("mongoose"),
+    Campground = require("./models/campground"),
+    Comment = require("./models/comment");
 //APP CONFIG
 mongoose.connect('mongodb://localhost:27017/yelp-camp', {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => console.log('Connected to DB!')).catch(error => console.log(error.message));
 
-const Campground = require("./models/campground");
-const Comment = require("./models/comment");
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
+app.use(express.static(__dirname + "/public"));
 
 
 //Landing Route
@@ -57,13 +57,14 @@ app.get("/campgrounds/:id", function (req, res) {
         if (err) {
             console.log(err);
         } else {
-            console.log(foundCampground);
+            //console.log(foundCampground);
             res.render("campgrounds/show", { campground: foundCampground });
         }
     });
 });
 
 // ======================================= Comments Route
+//NEW - Adding a comment
 app.get("/campgrounds/:id/comments/new", function (req, res) {
     Campground.findById(req.params.id, function (err, campground) {
         if (err) {
@@ -74,6 +75,7 @@ app.get("/campgrounds/:id/comments/new", function (req, res) {
     });
 });
 
+//CREATE - Creating a comment
 app.post("/campgrounds/:id/comments", function (req, res) {
     //lookup campground by id
     Campground.findById(req.params.id, function (err, campground) {
